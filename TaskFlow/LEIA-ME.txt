@@ -1,0 +1,19 @@
+TaskFlow · Aula 1 (15/10) · arquivos iniciais
+=============================================
+
+Estes três arquivos vêm prontos. Você escreve o resto, seguindo o fascículo.
+
+  index.html          a página (repare nos ids: é por eles que o código acha a tela)
+  css/taskflow.css    a aparência (cores, cartões, prioridades)
+  src/dom.ts          três funções prontas para conversar com a tela
+
+Como usar
+1. Crie a pasta do projeto num caminho simples, sem acentos nem espaços,
+   por exemplo C:\projetos\taskflow
+2. No terminal, dentro dela:  npm init -y   e   npm install -D typescript vite
+3. Copie para dentro dela o index.html, a pasta css e a pasta src deste zip.
+4. Siga o fascículo: package.json, tsconfig.json, tipos.ts, dados.ts e main.ts.
+5. Rode  npm run dev  e abra o endereço que aparecer (http://localhost:5173).
+
+Atenção: NÃO abra o index.html com dois cliques. Pelo file:// a página fica em branco.
+A página só funciona pelo npm run dev.
