@@ -1,15 +1,15 @@
-import type { Tarefa } from "./tipos";
-export const tarefas: Tarefa[] = [
-    { id: 1, titulo: "Estudar interfaces", prioridade: "alta", status: "pendente",
-        tags: ["estudo", "ts"], criadaEm: new Date() },
-    { id: 2, titulo: "Comprar café", prioridade: "baixa", status: "concluida",
-        tags: ["casa"], criadaEm: new Date() },
-    { id: 3, titulo: "Revisar pull request", descricao: "PR #42", prioridade: "alta",
-        status: "em_andamento", tags: ["trabalho"], criadaEm: new Date() },
-    { id: 4, titulo: "Praticar laços", prioridade: "media", status: "pendente",
-        tags: ["estudo", "ts"], criadaEm: new Date() },
-    { id: 5, titulo: "Agendar dentista", prioridade: "media", status: "pendente",
-        tags: ["saude"], criadaEm: new Date() },
-    { id: 6, titulo: "Organizar a mesa", prioridade: "baixa", status: "pendente",
-        tags: ["casa"], criadaEm: new Date() },
+import type { Consulta } from "./tipos";
+export const consultas: Consulta[] = [
+    { id: 1, titulo: "Check-up geral", prioridade: "baixa", status: "confirmada", especialidade: "geriatria",
+        procedimentos: ["hemograma completo", "parasitrológico"], criadaEm: new Date() },
+    { id: 2, titulo: "Eletrocardiograma", prioridade: "alta", status: "realizada", especialidade: "cardiologia",
+        procedimentos: ["eletrocardiograma"], criadaEm: new Date() },
+    { id: 3, titulo: "Arritmia", descricao: "Batimentos irregurales", prioridade: "alta",
+        status: "realizada", especialidade: "cardiologia", procedimentos: ["cardioversão elétrica"], criadaEm: new Date() },
+    { id: 4, titulo: "Gastrite", prioridade: "media", status: "confirmada", especialidade: "gastroenterologia",
+        procedimentos: ["antibióticos", "inibidores"], criadaEm: new Date() },
+    { id: 5, titulo: "Desconforto intestinal", prioridade: "baixa", status: "cancelada", especialidade: "gastroenterologia",
+        procedimentos: ["consulta cancelada"], criadaEm: new Date() },
+    { id: 6, titulo: "Tireoide", prioridade: "media", status: "marcada", especialidade: "endocrinologia",
+        procedimentos: ["iodoterapia"], criadaEm: new Date() },
 ];

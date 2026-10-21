@@ -1,16 +1,18 @@
 export type Prioridade = "baixa" | "media" | "alta";
-export type Status = "pendente" | "em_andamento" | "concluida";
+export type Status = "marcada" | "confirmada" | "realizada" | "cancelada";
+export type Especialidade = "cardiologia" | "gastroenterologia" | "geriatria" | "endocrinologia";
 
-export interface Tarefa {
+export interface Consulta {
     readonly id: number;
     titulo: string;
     descricao?: string;
     prioridade: Prioridade;
     status: Status;
-    tags: string[];
+    especialidade: Especialidade;
+    procedimentos: string[];
     criadaEm: Date;
 }
 
 //O que o usuario informa ao cadastrar:
 //id, status e criadaEm são responsabilidade do sistema
-export type NovaTarefa = Omit<Tarefa, "id" | "status" | "criadaEm">;
+export type NovaTarefa = Omit<Consulta, "id" | "status" | "criadaEm">;
