@@ -15,4 +15,4 @@ export interface Consulta {
 
 //O que o usuario informa ao cadastrar:
 //id, status e criadaEm são responsabilidade do sistema
-export type NovaTarefa = Omit<Consulta, "id" | "status" | "criadaEm">;
+export type NovaConsulta = Omit<Consulta, "id" | "status" | "criadaEm">;
