@@ -526,12 +526,85 @@ main,
   color: var(--suave);
 }
 
-.etiqueta--status {
-  color: var(--suave);
-  background: var(--cinza-claro);
-  border-color: transparent;
+/* Etiquetas de procedimentos */
+
+.procedimento {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 5px 10px;
+    border: 1px solid var(--borda);
+    border-radius: 6px;
+
+    background: var(--cinza-claro);
+    color: var(--suave);
+
+    font-size: 0.78rem;
+    font-weight: 500;
+
+    white-space: nowrap;
+
+    transition: background 0.2s ease,
+                color 0.2s ease,
+                border-color 0.2s ease;
 }
 
+.procedimento:hover {
+    background: var(--cartao);
+    color: var(--texto);
+    border-color: var(--azul);
+}
+
+/* Procedimentos adicionais */
+.procedimento--mais {
+    justify-content: center;
+    min-width: 34px;
+    padding: 5px 9px;
+
+    color: var(--azul);
+    background: var(--vermelho-claro);
+    border-color: transparent;
+
+    font-weight: 700;
+    cursor: help;
+}
+
+.procedimento--mais:hover {
+    color: var(--azul);
+    background: var(--vermelho-claro);
+}
+
+/* Etiquetas de status */
+
+/* Consulta marcada */
+.etiqueta--marcada {
+    color: var(--suave);
+    background: var(--cinza-claro);
+    border-color: transparent;
+}
+
+/* Consulta confirmada */
+.etiqueta--confirmada {
+    color: #1976d2;
+    background: #e3f2fd;
+    border-color: transparent;
+}
+
+/* Consulta realizada */
+.etiqueta--realizada {
+    color: #1976d2;
+    background: #e3f2fd;
+    border-color: transparent;
+    text-decoration: line-through;
+}
+
+/* Consulta cancelada */
+.etiqueta--cancelada {
+    color: #c62828;
+    background: #ffebee;
+    border-color: transparent;
+    font-weight: 750;
+}
 /* Estado vazio */
 
 .vazio {
