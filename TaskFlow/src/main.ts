@@ -1,7 +1,13 @@
 import { campo, elemento, selecao } from "./dom";
-import { buscarConsulta, listarConsultas } from "./api";
-import type { Prioridade, Consulta, Especialidade } from "./tipos";
-import { adicionarConsulta, transformar } from "./servicos";
+import {
+    buscarConsulta,
+    listarConsultas,
+    cadastrarConsulta,
+    alterarStatus,
+    removerConsulta
+} from "./api";
+import type { Prioridade, Status, Consulta, Especialidade } from "./tipos";
+import { transformar } from "./servicos";
 
 // ---------- Parte 1: tipos primitivos ----------
 const nomeDoSistema: string = "Consultas";
@@ -19,6 +25,27 @@ console.log(`${nomeDoSistema} iniciado. Autor: ${autor}`);
 
 // Começa vazia: quem preenche é a API
 let lista: Consulta[] = [];
+
+function mostrarErro(erro: unknown): void {
+    elemento("erro").textContent =
+        erro instanceof Error ? erro.message : "Erro inesperado.";
+}
+
+// Uma ajudante para criar botões sem repetir código
+function botao(
+    texto: string,
+    extra: string,
+    aoClicar: () => void
+): HTMLButtonElement {
+    const elementoBotao = document.createElement("button");
+
+    elementoBotao.type = "button";
+    elementoBotao.className = `botao botao--pequeno ${extra}`;
+    elementoBotao.textContent = texto;
+    elementoBotao.addEventListener("click", aoClicar);
+
+    return elementoBotao;
+}
 
 // Uma consulta vira um <li> pronto para a tela
 function criarItem(consulta: Consulta): HTMLLIElement {
@@ -71,6 +98,43 @@ function criarItem(consulta: Consulta): HTMLLIElement {
     meta.append(etiqueta, situacao, ...procedimentos);
     item.append(titulo, meta);
 
+    const acoes = document.createElement("div");
+    acoes.className = "consulta__acoes";
+
+    if (consulta.status === "marcada") {
+        acoes.append(
+            botao("Confirmar", "", () =>
+                mudarStatus(consulta.id, "confirmada")
+            ),
+            botao("Cancelar", "botao--perigo", () =>
+                mudarStatus(consulta.id, "cancelada")
+            )
+        );
+    } else if (consulta.status === "confirmada") {
+        acoes.append(
+            botao("Realizada", "botao--sucesso", () =>
+                mudarStatus(consulta.id, "realizada")
+            ),
+            botao("Cancelar", "botao--perigo", () =>
+                mudarStatus(consulta.id, "cancelada")
+            )
+        );
+    } else if (consulta.status === "cancelada") {
+        acoes.append(
+            botao("Reabrir", "", () =>
+                mudarStatus(consulta.id, "marcada")
+            )
+        );
+    }
+
+    acoes.append(
+        botao("Remover", "botao--perigo", () =>
+            remover(consulta.id)
+        )
+    );
+
+    item.append(titulo, meta, acoes);
+
     return item;
 }
 
@@ -107,46 +171,96 @@ function desenhar(): void {
     elemento("confirmada").textContent = String(confirmada);
     elemento("realizada").textContent = String(realizada);
     elemento("cancelada").textContent = String(cancelada);
+
+    // Encontra a primeira consulta de prioridade alta
+    const urgente = lista.find(
+        (consulta) => consulta.prioridade === "alta"
+    );
+
+    if (urgente) {
+        elemento("comece-por").textContent =
+            `Comece por: #${urgente.id} ${urgente.titulo}`;
+
+        elemento("comece-por").hidden = false;
+    } else {
+        elemento("comece-por").hidden = true;
+    }
 }
 
 // ---------- Parte 3: formulário ----------
 
-// O cadastro ainda grava somente na tela.
-// Na etapa seguinte, podemos fazer o cadastro também no banco.
-elemento("formulario").addEventListener("submit", (evento) => {
+elemento("formulario").addEventListener("submit", async (evento) => {
     evento.preventDefault();
 
     elemento("erro").textContent = "";
 
     try {
-        adicionarConsulta(lista, {
+        const nova = await cadastrarConsulta({
             titulo: campo("titulo").value.trim(),
             prioridade: selecao("prioridade").value as Prioridade,
             especialidade: selecao("especialidade").value as Especialidade,
             procedimentos: [],
         });
 
+        lista = [...lista, nova];
+
         campo("titulo").value = "";
+
         desenhar();
 
     } catch (erro) {
-        if (erro instanceof Error) {
-            elemento("erro").textContent = erro.message;
-        }
+        mostrarErro(erro);
     }
 });
 
+// Altera o status de uma consulta
+async function mudarStatus(
+    id: number,
+    status: Status
+): Promise<void> {
+    try {
+        elemento("erro").textContent = "";
+
+        await alterarStatus(id, status);
+
+        lista = lista.map((consulta) =>
+            consulta.id === id
+                ? { ...consulta, status }
+                : consulta
+        );
+
+        desenhar();
+
+    } catch (erro) {
+        mostrarErro(erro);
+    }
+}
+
+// Remove uma consulta
+async function remover(id: number): Promise<void> {
+    try {
+        elemento("erro").textContent = "";
+
+        await removerConsulta(id);
+
+        lista = lista.filter((consulta) => consulta.id !== id);
+
+        desenhar();
+
+    } catch (erro) {
+        mostrarErro(erro);
+    }
+}
+
 // ---------- Parte 4: início do programa ----------
 
-// Busca os dados no banco, depois desenha a tela
 async function iniciar(): Promise<void> {
     try {
         lista = await listarConsultas();
 
         desenhar();
 
-        // Busca uma consulta pelo ID.
-        // Pode não encontrar, assim como acontece com o find.
+        // Busca uma consulta pelo ID
         const procurada = await buscarConsulta(3);
 
         if (procurada) {
@@ -155,29 +269,8 @@ async function iniciar(): Promise<void> {
             console.log("Consulta #3 não existe.");
         }
 
-        // while: encontrar a primeira consulta de prioridade alta
-        let posicao = 0;
-
-        while (
-            posicao < lista.length &&
-            lista[posicao].prioridade !== "alta"
-        ) {
-            posicao++;
-        }
-
-        if (posicao < lista.length) {
-            const urgente = lista[posicao];
-
-            elemento("comece-por").textContent =
-                `Comece por: #${urgente.id} ${urgente.titulo}`;
-
-            elemento("comece-por").hidden = false;
-        }
-
     } catch (erro) {
-        if (erro instanceof Error) {
-            elemento("erro").textContent = erro.message;
-        }
+        mostrarErro(erro);
     }
 }
 
