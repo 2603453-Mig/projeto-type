@@ -4,7 +4,12 @@ import {
     listarConsultas,
     cadastrarConsulta,
     alterarStatus,
-    removerConsulta
+    removerConsulta,
+    criarConta,
+    encerrarSessao,
+    entrar,
+    guardarSessao,
+    sessaoAtual
 } from "./api";
 import type { Prioridade, Status, Consulta, Especialidade } from "./tipos";
 import { transformar } from "./servicos";
@@ -187,6 +192,82 @@ function desenhar(): void {
     }
 }
 
+
+// ---------- Procedimentos do cadastro ----------
+
+// Lista temporária dos procedimentos antes de cadastrar a consulta.
+let procedimentosTemporarios: string[] = [];
+
+// Desenha os procedimentos adicionados no formulário.
+function desenharProcedimentos(): void {
+    const listaProcedimentos = elemento("lista-procedimentos");
+    const itens: HTMLLIElement[] = [];
+
+    procedimentosTemporarios.forEach((procedimento, indice) => {
+        const item = document.createElement("li");
+        item.className = "procedimento__item";
+
+        const nome = document.createElement("span");
+        nome.textContent = procedimento;
+
+        const removerBotao = document.createElement("button");
+        removerBotao.type = "button";
+        removerBotao.className = "procedimento__remover";
+        removerBotao.textContent = "×";
+        removerBotao.setAttribute(
+            "aria-label",
+            `Remover ${procedimento}`
+        );
+
+        removerBotao.addEventListener("click", () => {
+            procedimentosTemporarios =
+                procedimentosTemporarios.filter(
+                    (_, i) => i !== indice
+                );
+
+            desenharProcedimentos();
+        });
+
+        item.append(nome, removerBotao);
+        itens.push(item);
+    });
+
+    listaProcedimentos.replaceChildren(...itens);
+}
+
+// Adiciona um procedimento à lista temporária.
+elemento("adicionar-procedimento").addEventListener("click", () => {
+    const entrada = campo("procedimento");
+    const procedimento = entrada.value.trim();
+
+    elemento("erro-procedimentos").textContent = "";
+
+    if (!procedimento) {
+        elemento("erro-procedimentos").textContent =
+            "Digite o nome de um procedimento.";
+
+        entrada.focus();
+        return;
+    }
+
+    procedimentosTemporarios.push(procedimento);
+
+    entrada.value = "";
+    entrada.focus();
+
+    desenharProcedimentos();
+});
+
+// Também permite adicionar usando a tecla Enter.
+campo("procedimento").addEventListener("keydown", (evento) => {
+    if (evento.key === "Enter") {
+        evento.preventDefault();
+
+        elemento("adicionar-procedimento").click();
+    }
+});
+
+
 // ---------- Parte 3: formulário ----------
 
 elemento("formulario").addEventListener("submit", async (evento) => {
@@ -199,12 +280,16 @@ elemento("formulario").addEventListener("submit", async (evento) => {
             titulo: campo("titulo").value.trim(),
             prioridade: selecao("prioridade").value as Prioridade,
             especialidade: selecao("especialidade").value as Especialidade,
-            procedimentos: [],
+            procedimentos: [...procedimentosTemporarios],
         });
 
         lista = [...lista, nova];
 
         campo("titulo").value = "";
+        procedimentosTemporarios = [];
+        campo("procedimento").value = "";
+        elemento("erro-procedimentos").textContent = "";
+        desenharProcedimentos();
 
         desenhar();
 
@@ -252,28 +337,71 @@ async function remover(id: number): Promise<void> {
     }
 }
 
-// ---------- Parte 4: início do programa ----------
-
+// ---------- A tela de entrada (Aula 5) ----------
+function mostrarErroEntrada(erro: unknown): void {
+    const mensagem = erro instanceof Error ? erro.message : "Erro inesperado.";
+    elemento("erro-entrada").textContent = mensagem;
+}
+// Troca entre "Entrar" e "Criar conta"
+function mostrarFormulario(criando: boolean): void {
+    elemento("form-criar").hidden = !criando;
+    elemento("form-entrar").hidden = criando;
+    elemento("alternar-entrada").textContent = criando
+        ? "Já tenho conta"
+        : "Ainda não tenho conta";
+    elemento("erro-entrada").textContent = "";
+}
+elemento("alternar-entrada").addEventListener("click", () => {
+    mostrarFormulario(elemento("form-criar").hidden === true); // escondido? então mostra
+});
+elemento("form-entrar").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    try {
+        guardarSessao(await entrar(campo("entrar-email").value, campo("entrar-senha").value));
+        campo("entrar-senha").value = "";
+        await iniciar();
+    } catch (erro) {
+        mostrarErroEntrada(erro);
+    }
+});
+elemento("form-criar").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const email = campo("criar-email").value;
+    const senha = campo("criar-senha").value;
+    try {
+        await criarConta(campo("criar-nome").value, email, senha);
+        guardarSessao(await entrar(email, senha)); // criou? já entra direto
+        (elemento("form-criar") as HTMLFormElement).reset(); // não deixa a senha no campo
+        await iniciar();
+    } catch (erro) {
+        mostrarErroEntrada(erro);
+    }
+});
+elemento("botao-sair").addEventListener("click", () => {
+    encerrarSessao();
+    lista = [];
+    (elemento("form-entrar") as HTMLFormElement).reset();
+    mostrarFormulario(false); // volta sempre para "Entrar"
+    iniciar();
+});
+// ---------- O começo: com sessão, mostra o sistema; sem, a entrada ----------
 async function iniciar(): Promise<void> {
+    const sessao = sessaoAtual();
+    elemento("tela-entrada").hidden = sessao !== undefined;
+    elemento("tela-app").hidden = sessao === undefined;
+    elemento("botao-sair").hidden = sessao === undefined;
+    elemento("usuario-nome").textContent = sessao?.nome ?? "";
+    if (!sessao) {
+        return;
+    }
+    elemento("erro-entrada").textContent = "";
     try {
         lista = await listarConsultas();
-
         desenhar();
-
-        // Busca uma consulta pelo ID
-        const procurada = await buscarConsulta(3);
-
-        if (procurada) {
-            console.log(`Consulta encontrada: ${procurada.titulo}`);
-        } else {
-            console.log("Consulta #3 não existe.");
-        }
-
     } catch (erro) {
         mostrarErro(erro);
     }
 }
-
 iniciar();
 
 /*
