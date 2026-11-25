@@ -59,9 +59,31 @@ function botao(
     return elementoBotao;
 }
 
+// Ordena as consultas por prioridade e situação.
+function ordenarConsultas(consultas: Consulta[]): Consulta[] {
+    const ordemPrioridade = {
+        alta: 1,
+        media: 2,
+        baixa: 3
+    };
+
+    const ordemStatus = {
+        marcada: 1,
+        confirmada: 1,
+        realizada: 2,
+        cancelada: 3
+    };
+
+    return [...consultas].sort((a, b) =>
+        ordemStatus[a.status] - ordemStatus[b.status]
+        || ordemPrioridade[a.prioridade] - ordemPrioridade[b.prioridade]
+        || a.id - b.id
+    );
+}
+
 
 // Uma consulta vira um <li> pronto para a tela.
-function criarItem(consulta: Consulta): HTMLLIElement {
+function criarItem(consulta: Consulta, idUsuario: number): HTMLLIElement {
     const item = document.createElement("li");
 
     item.className = `consulta consulta--${consulta.prioridade}`;
@@ -69,7 +91,15 @@ function criarItem(consulta: Consulta): HTMLLIElement {
     const titulo = document.createElement("h3");
 
     titulo.className = "consulta__titulo";
-    titulo.textContent = `#${consulta.id} ${consulta.titulo}`;
+    titulo.textContent = `#${idUsuario} ${consulta.titulo}`;
+
+    // Diferencia visualmente consultas realizadas e canceladas.
+    if (consulta.status === "cancelada") {
+        titulo.classList.add("consulta__titulo--cancelada");
+
+    } else if (consulta.status === "realizada") {
+        titulo.classList.add("consulta__titulo--realizada");
+    }
 
     const meta = document.createElement("div");
 
@@ -167,7 +197,14 @@ function criarItem(consulta: Consulta): HTMLLIElement {
 
 // A função que desenha a tela inteira a partir da lista.
 function desenhar(): void {
-    const itens = transformar(lista, criarItem);
+
+    // Ordena as consultas por prioridade.
+    const consultasOrdenadas = ordenarConsultas(lista);
+
+    // Cria os itens usando uma numeração própria para o usuário.
+    const itens = consultasOrdenadas.map((consulta, indice) =>
+        criarItem(consulta, indice + 1)
+    );
 
     elemento("lista").replaceChildren(...itens);
 
@@ -203,13 +240,15 @@ function desenhar(): void {
 
 
     // Encontra a primeira consulta de prioridade alta.
-    const urgente = lista.find(
+    const indiceUrgente = consultasOrdenadas.findIndex(
         (consulta) => consulta.prioridade === "alta"
     );
 
-    if (urgente) {
+    if (indiceUrgente !== -1) {
+        const urgente = consultasOrdenadas[indiceUrgente];
+
         elemento("comece-por").textContent =
-            `Comece por: #${urgente.id} ${urgente.titulo}`;
+            `Comece por: #${indiceUrgente + 1} ${urgente.titulo}`;
 
         elemento("comece-por").hidden = false;
 

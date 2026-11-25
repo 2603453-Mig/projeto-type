@@ -1,59 +1,47 @@
 
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-// Dados que serão armazenados dentro do token JWT.
-interface DadosToken {
-    id: number;
-}
+export const SEGREDO = process.env.JWT_SECRET ?? "troque-este-segredo";
 
-// Recupera a chave secreta definida no arquivo .env.
-const CHAVE_JWT = process.env.JWT_SECRET;
-
-if (!CHAVE_JWT) {
-    throw new Error("A variável JWT_SECRET não foi definida no arquivo .env.");
-}
-
-// ---------- Autenticação ----------
-
-// Verifica se o usuário está autenticado.
+// Middleware: verifica se o usuário possui um token válido.
 export function exigirLogin(
     req: Request,
     res: Response,
     next: NextFunction
 ): void {
-    const autorizacao = req.headers.authorization;
+    const cabecalho = req.headers.authorization;
+    const token = cabecalho?.startsWith("Bearer ")
+        ? cabecalho.slice(7)
+        : undefined;
 
-    if (!autorizacao || !autorizacao.startsWith("Bearer ")) {
-        res.status(401).json({ erro: "Autenticação necessária." });
+    if (!token) {
+        res.status(401).json({
+            erro: "Faça login para continuar."
+        });
         return;
     }
 
-    const token = autorizacao.slice(7);
-
     try {
-        const dados = jwt.verify(token, CHAVE_JWT) as DadosToken;
+        const dados = jwt.verify(token, SEGREDO) as { id: number };
 
         if (!Number.isInteger(dados.id) || dados.id <= 0) {
-            res.status(401).json({ erro: "Token inválido." });
+            res.status(401).json({
+                erro: "Token inválido."
+            });
             return;
         }
 
         res.locals.usuarioId = dados.id;
-
         next();
     } catch {
-        res.status(401).json({ erro: "Token inválido ou expirado." });
+        res.status(401).json({
+            erro: "Sua sessão expirou. Entre de novo."
+        });
     }
 }
 
 // Recupera o ID do usuário autenticado.
 export function usuarioDe(res: Response): number {
-    const usuarioId = res.locals.usuarioId;
-
-    if (!Number.isInteger(usuarioId) || usuarioId <= 0) {
-        throw new Error("Usuário não autenticado.");
-    }
-
-    return usuarioId;
+    return res.locals.usuarioId as number;
 }

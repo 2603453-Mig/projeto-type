@@ -1,371 +1,1031 @@
 
-/* ---------- Configurações gerais ---------- */
+/* =========================================
+   SISTEMA DE AGENDAMENTO DE CONSULTAS
+   Paleta: branco, cinza e vermelho
+========================================= */
+
+
+/* =========================================
+   1. VARIÁVEIS E TEMAS
+========================================= */
+
+:root {
+    --fundo: #f5f6f8;
+    --cartao: #ffffff;
+    --texto: #252a34;
+    --suave: #737b89;
+    --borda: #e2e5e9;
+
+    /* Cores principais */
+    --azul: #c62828;
+    --vermelho-hover: #a91f1f;
+    --vermelho-claro: #fff0f0;
+
+    /* Prioridades */
+    --alta: #d32f2f;
+    --media: #e89b32;
+    --baixa: #399764;
+
+    /* Elementos auxiliares */
+    --amarelo: #f9c21a;
+    --cinza-claro: #f0f2f5;
+
+    /* Sombras */
+    --sombra: 0 3px 12px rgba(30, 35, 45, 0.05);
+    --sombra-hover: 0 6px 18px rgba(30, 35, 45, 0.09);
+}
+
+:root[data-tema="escuro"] {
+    --fundo: #17191e;
+    --cartao: #22252c;
+    --texto: #f1f2f5;
+    --suave: #a6acb7;
+    --borda: #383c45;
+
+    --azul: #ef5350;
+    --vermelho-hover: #ff7774;
+    --vermelho-claro: #3b2427;
+
+    --alta: #ff6868;
+    --media: #ffb74d;
+    --baixa: #66bb8a;
+
+    --amarelo: #ffd54f;
+    --cinza-claro: #2c3038;
+
+    --sombra: 0 3px 12px rgba(0, 0, 0, 0.12);
+    --sombra-hover: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+
+/* =========================================
+   2. RESET E CONFIGURAÇÕES GERAIS
+========================================= */
 
 * {
     box-sizing: border-box;
-}
-
-:root {
-    font-family: Arial, Helvetica, sans-serif;
-    color: #252525;
-    background: #f5f5f5;
-}
-
-body {
-    margin: 0;
-    min-width: 320px;
-    padding: 32px 16px;
 }
 
 [hidden] {
     display: none !important;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--fundo);
+    color: var(--texto);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
 button,
 input,
+select,
+textarea {
+    font-family: inherit;
+}
+
+button,
 select {
-    font: inherit;
-}
-
-/* ---------- Estrutura principal ---------- */
-
-#tela-app,
-#tela-entrada {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-}
-
-#tela-entrada {
-    max-width: 420px;
-}
-
-header {
-    margin-bottom: 28px;
-}
-
-h1,
-h2,
-h3,
-p {
-    margin-top: 0;
-}
-
-h1 {
-    margin-bottom: 8px;
-    font-size: 28px;
-}
-
-h2 {
-    margin-bottom: 16px;
-    font-size: 21px;
-}
-
-h3 {
-    margin-bottom: 12px;
-    font-size: 17px;
-}
-
-/* ---------- Formulários ---------- */
-
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-label {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    font-weight: 600;
-}
-
-input,
-select {
-    width: 100%;
-    min-height: 42px;
-    padding: 10px 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background: #fff;
-    color: #252525;
-}
-
-input:focus,
-select:focus {
-    outline: 2px solid #1976d2;
-    outline-offset: 1px;
-}
-
-/* ---------- Botões ---------- */
-
-button {
-    min-height: 40px;
-    padding: 9px 15px;
-    border: none;
-    border-radius: 6px;
-    background: #1976d2;
-    color: #fff;
-    font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s ease;
 }
 
-button:hover {
-    background: #125ca5;
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid rgba(198, 40, 40, 0.2);
+    outline-offset: 2px;
 }
 
-button:focus-visible {
-    outline: 2px solid #252525;
-    outline-offset: 3px;
+
+/* =========================================
+   3. CABEÇALHO
+========================================= */
+
+.cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+
+    padding: 20px 32px;
+
+    background: var(--cartao);
+    color: var(--texto);
+    border-bottom: 3px solid var(--azul);
+    box-shadow: var(--sombra);
 }
 
-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+.cabecalho__titulo {
+    margin: 0;
+    font-size: 1.65rem;
+    font-weight: 750;
+    letter-spacing: -0.5px;
+}
+
+.cabecalho__titulo::first-letter {
+    color: var(--azul);
+}
+
+.cabecalho__subtitulo {
+    margin: 4px 0 0;
+    color: var(--suave);
+    font-size: 0.92rem;
+}
+
+.cabecalho__acoes {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+#usuario-nome {
+    color: var(--texto);
+    font-size: 0.95rem;
+    font-weight: 600;
 }
 
 #botao-sair {
-    background: #666;
+    flex-shrink: 0;
 }
 
-#botao-sair:hover {
-    background: #444;
+
+/* =========================================
+   4. CONTEÚDO PRINCIPAL
+========================================= */
+
+main,
+.entrada {
+    max-width: 1100px;
+    margin: 32px auto;
+    padding: 0 24px;
 }
 
-#alternar-entrada {
-    padding: 0;
-    min-height: auto;
-    background: transparent;
-    color: #1976d2;
-    text-align: left;
+.entrada {
+    max-width: 460px;
+    display: grid;
+    gap: 16px;
+    margin-top: 48px;
 }
 
-/* ---------- Mensagens de erro ---------- */
 
-#erro,
-#erro-entrada,
-#erro-procedimentos {
-    color: #c62828;
-    font-size: 14px;
+/* =========================================
+   5. FORMULÁRIOS E CAMPOS
+========================================= */
+
+.formulario {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 18px;
+
+    padding: 24px;
+
+    background: var(--cartao);
+    border: 1px solid var(--borda);
+    border-radius: 14px;
+    box-shadow: var(--sombra);
 }
 
-/* ---------- Estatísticas ---------- */
+.formulario h2 {
+    width: 100%;
+    margin: 0 0 4px;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.campo {
+    display: grid;
+    flex: 1 1 180px;
+    min-width: 0;
+    gap: 7px;
+}
+
+.campo__rotulo {
+    color: var(--texto);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.campo__entrada,
+.campo__selecao,
+.busca {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+
+    background: var(--cartao);
+    color: var(--texto);
+
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+
+    font-size: 0.95rem;
+
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.campo__entrada::placeholder,
+.busca::placeholder {
+    color: var(--suave);
+    opacity: 0.8;
+}
+
+.campo__entrada:hover,
+.campo__selecao:hover,
+.busca:hover {
+    border-color: #b9bec7;
+}
+
+.campo__entrada:focus,
+.campo__selecao:focus,
+.busca:focus {
+    outline: none;
+    border-color: var(--azul);
+    box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.1);
+}
+
+.campo__erro {
+    min-height: 1.2em;
+    margin: 4px 0;
+
+    color: var(--alta);
+    font-size: 0.85rem;
+}
+
+
+/* Formulários de autenticação */
+
+.entrada .formulario {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.entrada .campo {
+    flex: none;
+}
+
+
+/* =========================================
+   6. BOTÕES
+========================================= */
+
+.botao {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+
+    min-height: 40px;
+    padding: 9px 16px;
+
+    background: var(--cartao);
+    color: var(--texto);
+
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.botao:hover {
+    border-color: var(--azul);
+    box-shadow: var(--sombra);
+}
+
+.botao:active {
+    transform: translateY(1px);
+}
+
+.botao--primario {
+    background: var(--azul);
+    color: #ffffff;
+    border-color: var(--azul);
+}
+
+.botao--primario:hover {
+    background: var(--vermelho-hover);
+    color: #ffffff;
+    border-color: var(--vermelho-hover);
+    box-shadow: 0 4px 10px rgba(198, 40, 40, 0.18);
+}
+
+.botao--pequeno {
+    min-height: 32px;
+    padding: 5px 11px;
+    font-size: 0.83rem;
+}
+
+.botao--sucesso {
+    color: var(--baixa);
+    border-color: var(--baixa);
+}
+
+.botao--sucesso:hover {
+    background: var(--baixa);
+    color: #ffffff;
+}
+
+.botao--perigo {
+    color: var(--alta);
+    border-color: var(--alta);
+}
+
+.botao--perigo:hover {
+    background: var(--alta);
+    color: #ffffff;
+}
+
+
+/* =========================================
+   7. AVISOS
+========================================= */
+
+.aviso {
+    padding: 13px 16px;
+
+    background: #fff7df;
+    color: #70500b;
+
+    border: 1px solid #f3dfaa;
+    border-left: 4px solid var(--amarelo);
+    border-radius: 8px;
+
+    font-size: 0.92rem;
+}
+
+.aviso--oculto {
+    display: none;
+}
+
+
+/* =========================================
+   8. ESTATÍSTICAS
+========================================= */
 
 .estatisticas {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+
     margin: 24px 0;
-}
-
-.estatistica {
-    padding: 16px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: #fff;
-    text-align: center;
-}
-
-.estatistica strong {
-    display: block;
-    margin-top: 6px;
-    font-size: 24px;
-}
-
-/* ---------- Cadastro de procedimentos ---------- */
-
-#lista-procedimentos {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 0;
     padding: 0;
+
     list-style: none;
 }
 
-#lista-procedimentos li {
-    padding: 6px 10px;
-    border-radius: 5px;
-    background: #e8e8e8;
-    font-size: 14px;
+.estatistica {
+    position: relative;
+    overflow: hidden;
+
+    padding: 20px 16px;
+
+    background: var(--cartao);
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+    box-shadow: var(--sombra);
+
+    text-align: center;
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* ---------- Consultas ---------- */
+.estatistica:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--sombra-hover);
+}
 
-#lista {
+.estatistica__numero {
+    display: block;
+
+    color: var(--azul);
+    font-size: 2rem;
+    font-weight: 750;
+    line-height: 1.3;
+}
+
+.estatistica__rotulo {
+    display: block;
+    margin-top: 6px;
+
+    color: var(--suave);
+    font-size: 0.85rem;
+}
+
+
+/* =========================================
+   9. FILTROS E PESQUISA
+========================================= */
+
+.filtros {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 14px;
+
+    margin: 24px 0 18px;
+}
+
+.filtros__grupo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.filtro {
+    padding: 8px 15px;
+
+    background: var(--cartao);
+    color: var(--suave);
+
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.filtro:hover {
+    color: var(--azul);
+    border-color: var(--azul);
+}
+
+.filtro--ativo {
+    background: var(--azul);
+    color: #ffffff;
+    border-color: var(--azul);
+}
+
+.filtro--ativo:hover {
+    background: var(--vermelho-hover);
+    color: #ffffff;
+    border-color: var(--vermelho-hover);
+}
+
+
+/* =========================================
+   10. LISTA DE CONSULTAS
+========================================= */
+
+.lista {
+    display: grid;
+    gap: 14px;
+
     margin: 0;
     padding: 0;
+
     list-style: none;
 }
 
 .consulta {
-    padding: 18px;
-    border: 1px solid #ddd;
-    border-left: 5px solid #999;
-    border-radius: 8px;
-    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 18px;
+
+    padding: 18px 20px;
+
+    background: var(--cartao);
+
+    border: 1px solid var(--borda);
+    border-left: 5px solid var(--media);
+    border-radius: 12px;
+
+    box-shadow: var(--sombra);
+
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.consulta--baixa {
-    border-left-color: #777;
-}
-
-.consulta--media {
-    border-left-color: #e0a000;
+.consulta:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-hover);
 }
 
 .consulta--alta {
-    border-left-color: #c62828;
+    border-left-color: var(--alta);
+}
+
+.consulta--baixa {
+    border-left-color: var(--baixa);
+}
+
+.consulta--concluida {
+    opacity: 0.68;
+}
+
+.consulta--concluida .consulta__titulo {
+    text-decoration: line-through;
+}
+
+/* Consulta cancelada */
+.consulta__titulo--cancelada {
+    color: #d32f2f;
+}
+
+/* Consulta realizada */
+.consulta__titulo--realizada {
+    color: #1976d2;
+}
+
+.consulta--atrasada {
+    background: var(--vermelho-claro);
+    box-shadow: inset 0 0 0 1px var(--alta);
+}
+
+.consulta__principal {
+    flex: 1 1 260px;
+    min-width: 0;
 }
 
 .consulta__titulo {
-    margin-bottom: 12px;
-    font-size: 18px;
+    margin: 0 0 6px;
+
+    font-size: 1.08rem;
     font-weight: 700;
+    line-height: 1.4;
 }
 
-/* ---------- Etiquetas ---------- */
+.consulta__descricao {
+    margin: 0 0 10px;
 
-.etiquetas {
+    color: var(--suave);
+    font-size: 0.92rem;
+
+    overflow-wrap: anywhere;
+}
+
+.consulta__meta,
+.consulta__acoes {
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 12px;
 }
 
-.etiqueta {
-    display: inline-block;
-    padding: 5px 9px;
-    border-radius: 5px;
-    background: #eee;
-    color: #444;
-    font-size: 13px;
+.consulta__acoes {
+    justify-content: flex-end;
+}
+
+
+/* =========================================
+   11. ETIQUETAS DE PRIORIDADE E STATUS
+========================================= */
+
+.etiqueta,
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    padding: 4px 10px;
+
+    background: var(--cinza-claro);
+    border: 1px solid var(--borda);
+    border-radius: 6px;
+
+    font-size: 0.78rem;
     font-weight: 600;
 }
 
-/* Prioridade */
 
-.etiqueta--baixa {
-    background: #eee;
-    color: #555;
+/* Prioridades */
+
+.etiqueta--alta {
+    color: var(--alta);
+    background: var(--vermelho-claro);
+    border-color: transparent;
 }
 
 .etiqueta--media {
-    background: #fff1c2;
-    color: #765500;
+    color: #a96412;
+    background: #fff4e3;
+    border-color: transparent;
 }
 
-.etiqueta--alta {
-    background: #fde0e0;
-    color: #a31616;
+.etiqueta--baixa {
+    color: var(--baixa);
+    background: #e8f6ee;
+    border-color: transparent;
 }
+
 
 /* Status */
 
 .etiqueta--marcada {
-    background: #eee;
-    color: #555;
+    color: var(--suave);
+    background: var(--cinza-claro);
+    border-color: transparent;
 }
 
 .etiqueta--confirmada {
-    background: #dcecff;
-    color: #155a9c;
+    color: #1976d2;
+    background: #e3f2fd;
+    border-color: transparent;
 }
 
 .etiqueta--realizada {
-    background: #dcecff;
-    color: #155a9c;
+    color: #1976d2;
+    background: #e3f2fd;
+    border-color: transparent;
     text-decoration: line-through;
 }
 
 .etiqueta--cancelada {
-    background: #fde0e0;
-    color: #b71c1c;
-    font-weight: 700;
+    color: #c62828;
+    background: #ffebee;
+    border-color: transparent;
+    font-weight: 750;
 }
 
-/* ---------- Procedimentos da consulta ---------- */
 
-.consulta__procedimentos {
+/* Etiquetas genéricas */
+
+.tag {
+    color: var(--suave);
+}
+
+
+/* =========================================
+   12. PROCEDIMENTOS NAS CONSULTAS
+========================================= */
+
+.procedimento {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 5px 10px;
+
+    background: var(--cinza-claro);
+    color: var(--suave);
+
+    border: 1px solid var(--borda);
+    border-radius: 6px;
+
+    font-size: 0.78rem;
+    font-weight: 500;
+
+    white-space: nowrap;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.procedimento:hover {
+    background: var(--cartao);
+    color: var(--texto);
+    border-color: var(--azul);
+}
+
+.procedimento--mais {
+    justify-content: center;
+    min-width: 34px;
+    padding: 5px 9px;
+
+    color: var(--azul);
+    background: var(--vermelho-claro);
+    border-color: transparent;
+
+    font-weight: 700;
+    cursor: help;
+}
+
+.procedimento--mais:hover {
+    color: var(--azul);
+    background: var(--vermelho-claro);
+}
+
+
+/* =========================================
+   13. FORMULÁRIO DE CADASTRO DE CONSULTAS
+========================================= */
+
+#formulario {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+    gap: 20px;
+}
+
+#formulario > .campo:not(.campo--procedimentos) {
+    min-width: 0;
+}
+
+
+/* Seção de procedimentos */
+
+#formulario .campo--procedimentos {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin-top: 2px;
+}
+
+
+/* Entrada de procedimentos */
+
+.procedimento__entrada {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.procedimento__entrada .campo__entrada {
+    flex: 1;
+    min-width: 0;
+}
+
+
+/* Botão adicionar procedimento */
+
+.botao--adicionar {
+    flex-shrink: 0;
+    min-height: 44px;
+    padding: 0 18px;
+
+    background: var(--azul);
+    color: #ffffff;
+
+    border: 1px solid var(--azul);
+    border-radius: 8px;
+
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.botao--adicionar:hover {
+    background: var(--vermelho-hover);
+    border-color: var(--vermelho-hover);
+}
+
+
+/* Lista de procedimentos adicionados */
+
+.procedimento__lista {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin: 10px 0;
+    gap: 9px;
+
+    margin: 12px 0 0;
     padding: 0;
+
     list-style: none;
 }
 
-.consulta__procedimentos li {
-    padding: 5px 8px;
-    border-radius: 5px;
-    background: #f0f0f0;
-    color: #444;
-    font-size: 13px;
-}
-
-/* ---------- Ações da consulta ---------- */
-
-.consulta__acoes {
+.procedimento__item {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 14px;
+    align-items: center;
+    gap: 10px;
+
+    padding: 7px 10px 7px 13px;
+
+    background: var(--cinza-claro);
+    color: var(--texto);
+
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+
+    font-size: 0.85rem;
 }
 
-.consulta__acoes button {
-    min-height: 34px;
-    padding: 7px 11px;
-    font-size: 13px;
+
+/* Botão remover procedimento */
+
+.procedimento__remover {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 22px;
+    height: 22px;
+    padding: 0;
+
+    background: transparent;
+    color: var(--alta);
+
+    border: none;
+    border-radius: 5px;
+
+    font-size: 19px;
+    line-height: 1;
+    cursor: pointer;
 }
 
-.consulta__acoes .botao-remover {
-    background: #c62828;
+.procedimento__remover:hover {
+    background: var(--vermelho-claro);
 }
 
-.consulta__acoes .botao-remover:hover {
-    background: #9e1f1f;
+
+/* Mensagem de erro dos procedimentos */
+
+#erro-procedimentos {
+    margin-bottom: 0;
 }
 
-/* ---------- Consulta prioritária ---------- */
 
-#comece-por {
-    margin-bottom: 20px;
+/* Botão principal de cadastro */
+
+#formulario > .botao--primario {
+    grid-column: 1 / -1;
+    justify-self: end;
+    min-width: 120px;
 }
 
-/* ---------- Responsividade ---------- */
 
-@media (max-width: 600px) {
-    body {
-        padding: 20px 12px;
-    }
+/* =========================================
+   14. ESTADO VAZIO
+========================================= */
 
-    h1 {
-        font-size: 24px;
+.vazio {
+    padding: 36px 20px;
+
+    background: var(--cartao);
+    color: var(--suave);
+
+    border: 1px dashed var(--borda);
+    border-radius: 12px;
+
+    text-align: center;
+}
+
+
+/* =========================================
+   15. RESPONSIVIDADE
+========================================= */
+
+/* Tablets e telas intermediárias */
+
+@media (max-width: 900px) {
+    #formulario {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .estatisticas {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .consulta {
-        padding: 14px;
-    }
-
-    .consulta__acoes button {
-        flex: 1 1 auto;
+        gap: 12px;
     }
 }
+
+
+/* Tablets menores */
+
+@media (max-width: 800px) {
+    .cabecalho {
+        padding: 18px 22px;
+    }
+
+    main,
+    .entrada {
+        margin-top: 24px;
+        padding: 0 18px;
+    }
+
+    .formulario {
+        padding: 20px;
+    }
+}
+
+
+/* Celulares */
+
+@media (max-width: 600px) {
+    .cabecalho {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .cabecalho__titulo {
+        font-size: 1.4rem;
+    }
+
+    .cabecalho__acoes {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    main,
+    .entrada {
+        padding: 0 14px;
+    }
+
+    .estatisticas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .estatistica {
+        padding: 16px 10px;
+    }
+
+    .estatistica__numero {
+        font-size: 1.65rem;
+    }
+
+    .formulario {
+        padding: 16px;
+        gap: 14px;
+    }
+
+    .campo {
+        flex-basis: 100%;
+    }
+
+    /* Formulário de consultas */
+
+    #formulario {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    #formulario .campo--procedimentos {
+        grid-column: 1;
+    }
+
+    #formulario > .botao--primario {
+        grid-column: 1;
+        justify-self: stretch;
+        width: 100%;
+    }
+
+    .procedimento__entrada {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .botao--adicionar {
+        width: 100%;
+    }
+
+    /* Filtros */
+
+    .filtros {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .filtros__grupo {
+        width: 100%;
+    }
+
+    .filtro {
+        flex: 1;
+        text-align: center;
+    }
+
+    /* Cartões de consultas */
+
+    .consulta {
+        align-items: flex-start;
+        padding: 16px;
+    }
+
+    .consulta__acoes {
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .botao {
+        min-height: 42px;
+    }
+}
+
+
+/* =========================================
+   16. ACESSIBILIDADE
+========================================= */
 
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
     *::after {
         scroll-behavior: auto !important;
-        transition: none !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
     }
 }

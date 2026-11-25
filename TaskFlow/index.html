@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="pt-BR">
 
@@ -40,13 +39,7 @@
                     E-mail
                 </label>
 
-                <input
-                    class="campo__entrada"
-                    id="entrar-email"
-                    type="email"
-                    autocomplete="email"
-                    required
-                />
+                <input class="campo__entrada" id="entrar-email" type="email" autocomplete="email" required />
             </div>
 
             <div class="campo">
@@ -54,13 +47,8 @@
                     Senha
                 </label>
 
-                <input
-                    class="campo__entrada"
-                    id="entrar-senha"
-                    type="password"
-                    autocomplete="current-password"
-                    required
-                />
+                <input class="campo__entrada" id="entrar-senha" type="password" autocomplete="current-password"
+                    required />
             </div>
 
             <button class="botao botao--primario" type="submit">
@@ -79,13 +67,7 @@
                     Nome
                 </label>
 
-                <input
-                    class="campo__entrada"
-                    id="criar-nome"
-                    type="text"
-                    autocomplete="name"
-                    required
-                />
+                <input class="campo__entrada" id="criar-nome" type="text" autocomplete="name" required />
             </div>
 
             <div class="campo">
@@ -93,13 +75,7 @@
                     E-mail
                 </label>
 
-                <input
-                    class="campo__entrada"
-                    id="criar-email"
-                    type="email"
-                    autocomplete="email"
-                    required
-                />
+                <input class="campo__entrada" id="criar-email" type="email" autocomplete="email" required />
             </div>
 
             <div class="campo">
@@ -107,14 +83,8 @@
                     Senha (6 caracteres ou mais)
                 </label>
 
-                <input
-                    class="campo__entrada"
-                    id="criar-senha"
-                    type="password"
-                    minlength="6"
-                    autocomplete="new-password"
-                    required
-                />
+                <input class="campo__entrada" id="criar-senha" type="password" minlength="6" autocomplete="new-password"
+                    required />
             </div>
 
             <button class="botao botao--primario" type="submit">
@@ -124,19 +94,11 @@
         </form>
 
         <!-- ALTERNAR ENTRE LOGIN E CADASTRO -->
-        <button
-            class="botao botao--pequeno"
-            id="alternar-entrada"
-            type="button"
-        >
+        <button class="botao botao--pequeno" id="alternar-entrada" type="button">
             Ainda não tenho conta
         </button>
 
-        <p
-            class="campo__erro"
-            id="erro-entrada"
-            role="alert"
-        ></p>
+        <p class="campo__erro" id="erro-entrada" role="alert"></p>
 
     </section>
 
@@ -148,11 +110,7 @@
 
             <span id="usuario-nome"></span>
 
-            <button
-                id="botao-sair"
-                class="botao botao--pequeno"
-                type="button"
-            >
+            <button id="botao-sair" class="botao botao--pequeno" type="button">
                 Sair
             </button>
 
@@ -168,14 +126,7 @@
                     Título
                 </label>
 
-                <input
-                    class="campo__entrada"
-                    id="titulo"
-                    type="text"
-                    autocomplete="off"
-                    required
-                    minlength="3"
-                />
+                <input class="campo__entrada" id="titulo" type="text" autocomplete="off" required minlength="3" />
 
             </div>
 
@@ -186,10 +137,7 @@
                     Prioridade
                 </label>
 
-                <select
-                    class="campo__selecao"
-                    id="prioridade"
-                >
+                <select class="campo__selecao" id="prioridade">
                     <option value="baixa">Baixa</option>
                     <option value="media" selected>Média</option>
                     <option value="alta">Alta</option>
@@ -204,10 +152,7 @@
                     Especialidade
                 </label>
 
-                <select
-                    class="campo__selecao"
-                    id="especialidade"
-                >
+                <select class="campo__selecao" id="especialidade">
                     <option value="cardiologia">Cardiologia</option>
                     <option value="gastroenterologia">Gastroenterologia</option>
                     <option value="geriatria">Geriatria</option>
@@ -216,72 +161,41 @@
 
             </div>
 
-            <!-- PROCEDIMENTOS -->
+            <!-- Cadastro de procedimentos -->
             <div class="campo campo--procedimentos">
-
                 <label class="campo__rotulo" for="procedimento">
                     Procedimentos
                 </label>
 
-                <div class="procedimentos__entrada">
+                <div class="procedimento__entrada">
+                    <input class="campo__entrada" id="procedimento" type="text" placeholder="Digite um procedimento..."
+                        autocomplete="off" />
 
-                    <input
-                        class="campo__entrada"
-                        id="procedimento"
-                        type="text"
-                        placeholder="Digite um procedimento"
-                        autocomplete="off"
-                    />
-
-                    <button
-                        class="botao botao--secundario"
-                        id="adicionar-procedimento"
-                        type="button"
-                    >
+                    <button class="botao botao--adicionar" id="adicionar-procedimento" type="button">
                         + Adicionar
                     </button>
-
                 </div>
 
-                <!-- LISTA TEMPORÁRIA DE PROCEDIMENTOS -->
-                <ul
-                    class="lista-procedimentos"
-                    id="lista-procedimentos"
-                ></ul>
+                <ul class="procedimento__lista" id="lista-procedimentos" aria-label="Procedimentos adicionados"></ul>
 
-                <p
-                    class="campo__erro"
-                    id="erro-procedimentos"
-                    role="alert"
-                ></p>
-
+                <p class="campo__erro" id="erro-procedimentos" role="alert"></p>
             </div>
 
             <!-- CADASTRAR -->
-            <button
-                class="botao botao--primario"
-                type="submit"
-            >
+            <button class="botao botao--primario" type="submit">
                 Cadastrar
             </button>
 
         </form>
 
         <!-- ERROS DO CADASTRO -->
-        <p
-            class="campo__erro"
-            id="erro"
-            role="alert"
-        ></p>
+        <p class="campo__erro" id="erro" role="alert"></p>
 
         <!-- ESTATÍSTICAS -->
         <ul class="estatisticas">
 
             <li class="estatistica">
-                <span
-                    class="estatistica__numero"
-                    id="marcada"
-                >0</span>
+                <span class="estatistica__numero" id="marcada">0</span>
 
                 <span class="estatistica__rotulo">
                     Marcada
@@ -289,10 +203,7 @@
             </li>
 
             <li class="estatistica">
-                <span
-                    class="estatistica__numero"
-                    id="confirmada"
-                >0</span>
+                <span class="estatistica__numero" id="confirmada">0</span>
 
                 <span class="estatistica__rotulo">
                     Confirmada
@@ -300,10 +211,7 @@
             </li>
 
             <li class="estatistica">
-                <span
-                    class="estatistica__numero"
-                    id="realizada"
-                >0</span>
+                <span class="estatistica__numero" id="realizada">0</span>
 
                 <span class="estatistica__rotulo">
                     Realizada
@@ -311,10 +219,7 @@
             </li>
 
             <li class="estatistica">
-                <span
-                    class="estatistica__numero"
-                    id="cancelada"
-                >0</span>
+                <span class="estatistica__numero" id="cancelada">0</span>
 
                 <span class="estatistica__rotulo">
                     Cancelada
@@ -324,25 +229,16 @@
         </ul>
 
         <!-- SUGESTÃO DE CONSULTA -->
-        <p
-            class="aviso"
-            id="comece-por"
-            hidden
-        ></p>
+        <p class="aviso" id="comece-por" hidden></p>
 
         <!-- LISTAGEM DE CONSULTAS -->
-        <ul
-            class="lista"
-            id="lista"
-        ></ul>
+        <ul class="lista" id="lista"></ul>
 
     </main>
 
     <!-- SCRIPT PRINCIPAL -->
-    <script
-        type="module"
-        src="./src/main.ts"
-    ></script>
+    <script type="module" src="./src/main.ts"></script>
 
 </body>
+
 </html>
