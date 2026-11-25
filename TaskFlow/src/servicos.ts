@@ -1,7 +1,8 @@
-import type { NovaConsulta, Consulta } from "./tipos";
 
-// gerarId e adicionarConsulta foram removidas:
-// agora quem cria o ID e cadastra as consultas é o banco.
+ // ---------- Serviços auxiliares ----------
+
+// Transforma cada elemento de uma lista usando uma função de transformação.
+// Recebe uma lista de elementos e uma regra, retornando uma nova lista.
 
 export function transformar<T, R>(
     lista: T[],
