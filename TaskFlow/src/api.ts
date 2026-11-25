@@ -1,3 +1,4 @@
+
 import type { NovaConsulta, Status, Consulta, Sessao } from "./tipos";
 
 const CHAVE_SESSAO = "consultas:sessao";
@@ -7,7 +8,28 @@ const CHAVE_SESSAO = "consultas:sessao";
 export function sessaoAtual(): Sessao | undefined {
     const texto = localStorage.getItem(CHAVE_SESSAO);
 
-    return texto ? (JSON.parse(texto) as Sessao) : undefined;
+    if (!texto) {
+        return undefined;
+    }
+
+    try {
+        const sessao = JSON.parse(texto) as Sessao;
+
+        if (
+            typeof sessao.token !== "string" ||
+            !sessao.token ||
+            typeof sessao.nome !== "string"
+        ) {
+            encerrarSessao();
+            return undefined;
+        }
+
+        return sessao;
+
+    } catch {
+        encerrarSessao();
+        return undefined;
+    }
 }
 
 export function guardarSessao(sessao: Sessao): void {
@@ -41,6 +63,8 @@ async function enviar(
     if (resposta.status === 401 && sessao) {
         encerrarSessao();
         location.reload();
+
+        throw new Error("Sessão expirada. Entre novamente.");
     }
 
     if (!resposta.ok) {
@@ -50,7 +74,9 @@ async function enviar(
         };
 
         // 502/504: o Vite não encontrou a API.
-        const semApi = resposta.status === 502 || resposta.status === 504;
+        const semApi =
+            resposta.status === 502 ||
+            resposta.status === 504;
 
         throw new Error(
             dados.erro ??
@@ -118,7 +144,7 @@ export async function buscarConsulta(
     } catch (erro) {
         if (
             erro instanceof Error &&
-            erro.message === `Consulta #${id} não encontrada.`
+            erro.message === "Consulta não encontrada."
         ) {
             return null;
         }
@@ -134,7 +160,10 @@ export async function entrar(
     email: string,
     senha: string
 ): Promise<Sessao> {
-    const resposta = await enviar("POST", "/api/login", { email, senha });
+    const resposta = await enviar("POST", "/api/login", {
+        email,
+        senha
+    });
 
     return (await resposta.json()) as Sessao;
 }
@@ -145,5 +174,9 @@ export async function criarConta(
     email: string,
     senha: string
 ): Promise<void> {
-    await enviar("POST", "/api/usuarios", { nome, email, senha });
+    await enviar("POST", "/api/usuarios", {
+        nome,
+        email,
+        senha
+    });
 }
