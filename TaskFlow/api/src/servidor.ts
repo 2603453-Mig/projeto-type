@@ -1,6 +1,8 @@
+
 import express, { type NextFunction, type Request, type Response } from "express";
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { banco } from "./banco";
+import { exigirLogin, usuarioDe } from "./autenticacao";
 import {
     PRIORIDADES,
     STATUS,
@@ -11,7 +13,6 @@ import {
 
 const app = express();
 app.use(express.json());
-const USUARIO_FIXO = 1;
 
 // SELECT principal: consulta os dados de todas as consultas.
 // Os AS adaptam os nomes das colunas do banco para o TypeScript.
@@ -71,6 +72,7 @@ function organizarConsultas(linhas: RowDataPacket[]) {
     return Array.from(resultado.values());
 }
 
+// Valida os dados recebidos para cadastrar uma consulta.
 function validar(dados: DadosConsulta): string | null {
     if (!dados.titulo || dados.titulo.trim().length < 3) {
         return "O título deve possuir pelo menos 3 caracteres.";
@@ -87,7 +89,9 @@ function validar(dados: DadosConsulta): string | null {
     if (
         dados.procedimentos !== undefined &&
         (!Array.isArray(dados.procedimentos) ||
-            !dados.procedimentos.every(p => typeof p === "string" && p.trim().length > 0))
+            !dados.procedimentos.every(
+                p => typeof p === "string" && p.trim().length > 0
+            ))
     ) {
         return "A lista de procedimentos é inválida.";
     }
@@ -95,10 +99,13 @@ function validar(dados: DadosConsulta): string | null {
     return null;
 }
 
-async function buscarUma(id: number) {
+// Busca uma consulta específica pertencente ao usuário autenticado.
+async function buscarUma(id: number, usuarioId: number) {
     const [linhas] = await banco.execute<RowDataPacket[]>(
-        `${SELECT_CONSULTAS} WHERE c.id = ? AND c.usuario_id = ? ORDER BY p.ordem`,
-        [id, USUARIO_FIXO]
+        `${SELECT_CONSULTAS}
+        WHERE c.id = ? AND c.usuario_id = ?
+        ORDER BY p.ordem`,
+        [id, usuarioId]
     );
 
     return linhas.length > 0
@@ -106,20 +113,22 @@ async function buscarUma(id: number) {
         : null;
 }
 
-// Lista somente as consultas do usuário atual.
-app.get("/api/consultas", async (_req, res) => {
+// ---------- LISTAR ----------
+app.get("/api/consultas", exigirLogin, async (_req, res) => {
+    const usuarioId = usuarioDe(res);
+
     const [linhas] = await banco.execute<RowDataPacket[]>(
         `${SELECT_CONSULTAS}
         WHERE c.usuario_id = ?
         ORDER BY c.id, p.ordem`,
-        [USUARIO_FIXO]
+        [usuarioId]
     );
 
     res.json(organizarConsultas(linhas));
 });
 
-// Uma consulta: pode não existir!
-app.get("/api/consultas/:id", async (req, res) => {
+// ---------- BUSCAR UMA ----------
+app.get("/api/consultas/:id", exigirLogin, async (req, res) => {
     const id = Number(req.params.id);
 
     if (!Number.isInteger(id) || id <= 0) {
@@ -127,25 +136,20 @@ app.get("/api/consultas/:id", async (req, res) => {
         return;
     }
 
-    const [linhas] = await banco.execute<RowDataPacket[]>(
-        `${SELECT_CONSULTAS}
-    WHERE c.id = ? AND c.usuario_id = ?
-    ORDER BY p.ordem`,
-        [id, USUARIO_FIXO]
-    );
+    const consulta = await buscarUma(id, usuarioDe(res));
 
-    if (linhas.length === 0) {
+    if (!consulta) {
         res.status(404).json({
             erro: `Consulta #${id} não encontrada.`
         });
         return;
     }
 
-    res.json(organizarConsultas(linhas)[0]);
+    res.json(consulta);
 });
 
 // ---------- CRIAR ----------
-app.post("/api/consultas", async (req, res) => {
+app.post("/api/consultas", exigirLogin, async (req, res) => {
     const dados = req.body as DadosConsulta;
     const problema = validar(dados);
 
@@ -154,6 +158,7 @@ app.post("/api/consultas", async (req, res) => {
         return;
     }
 
+    const usuarioId = usuarioDe(res);
     const conexao = await banco.getConnection();
 
     try {
@@ -164,7 +169,7 @@ app.post("/api/consultas", async (req, res) => {
             (usuario_id, titulo, descricao, prioridade, especialidade, prazo)
             VALUES (?, ?, ?, ?, ?, ?)`,
             [
-                USUARIO_FIXO,
+                usuarioId,
                 dados.titulo!.trim(),
                 dados.descricao ?? null,
                 dados.prioridade ?? "media",
@@ -174,7 +179,6 @@ app.post("/api/consultas", async (req, res) => {
         );
 
         const consultaId = resultado.insertId;
-
         const procedimentos = dados.procedimentos ?? [];
 
         for (let i = 0; i < procedimentos.length; i++) {
@@ -188,7 +192,7 @@ app.post("/api/consultas", async (req, res) => {
 
         await conexao.commit();
 
-        res.status(201).json(await buscarUma(consultaId));
+        res.status(201).json(await buscarUma(consultaId, usuarioId));
     } catch (erro) {
         await conexao.rollback();
         throw erro;
@@ -198,7 +202,7 @@ app.post("/api/consultas", async (req, res) => {
 });
 
 // ---------- ATUALIZAR (só o status) ----------
-app.patch("/api/consultas/:id/status", async (req, res) => {
+app.patch("/api/consultas/:id/status", exigirLogin, async (req, res) => {
     const { status } = req.body as { status?: Status };
 
     if (!status || !STATUS.includes(status)) {
@@ -213,11 +217,13 @@ app.patch("/api/consultas/:id/status", async (req, res) => {
         return;
     }
 
+    const usuarioId = usuarioDe(res);
+
     const [resultado] = await banco.execute<ResultSetHeader>(
         `UPDATE consultas
         SET status = ?
         WHERE id = ? AND usuario_id = ?`,
-        [status, id, USUARIO_FIXO]
+        [status, id, usuarioId]
     );
 
     if (resultado.affectedRows === 0) {
@@ -231,7 +237,7 @@ app.patch("/api/consultas/:id/status", async (req, res) => {
 });
 
 // ---------- APAGAR ----------
-app.delete("/api/consultas/:id", async (req, res) => {
+app.delete("/api/consultas/:id", exigirLogin, async (req, res) => {
     const id = Number(req.params.id);
 
     if (!Number.isInteger(id) || id <= 0) {
@@ -239,10 +245,12 @@ app.delete("/api/consultas/:id", async (req, res) => {
         return;
     }
 
+    const usuarioId = usuarioDe(res);
+
     const [resultado] = await banco.execute<ResultSetHeader>(
         `DELETE FROM consultas
         WHERE id = ? AND usuario_id = ?`,
-        [id, USUARIO_FIXO]
+        [id, usuarioId]
     );
 
     if (resultado.affectedRows === 0) {
@@ -254,7 +262,6 @@ app.delete("/api/consultas/:id", async (req, res) => {
 
     res.status(204).end();
 });
-
 
 // ---------- ERROS NÃO PREVISTOS ----------
 app.use((
