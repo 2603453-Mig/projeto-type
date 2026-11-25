@@ -1,3 +1,6 @@
+
+// ---------- Tipos básicos ----------
+
 export type Prioridade = "baixa" | "media" | "alta";
 
 export type Status = "marcada" | "confirmada" | "realizada" | "cancelada";
@@ -8,7 +11,13 @@ export type Especialidade =
     | "geriatria"
     | "endocrinologia";
 
-export const PRIORIDADES: Prioridade[] = ["baixa", "media", "alta"];
+// ---------- Valores permitidos ----------
+
+export const PRIORIDADES: Prioridade[] = [
+    "baixa",
+    "media",
+    "alta"
+];
 
 export const STATUS: Status[] = [
     "marcada",
@@ -46,7 +55,7 @@ export type NovaConsulta = Omit<
 
 // Dados recebidos pela API ao cadastrar ou atualizar uma consulta.
 export interface DadosConsulta {
-    titulo?: string;
+    titulo: string;
     descricao?: string | null;
     prioridade?: Prioridade;
     especialidade: Especialidade;
